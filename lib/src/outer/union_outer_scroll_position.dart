@@ -1,7 +1,8 @@
-import 'package:union_tabs/src/notification/scroll_position.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+// import 'package:union_tabs/src/notification/scroll_position.dart';
+// import 'package:flutter/foundation.dart';
+// import 'package:flutter/material.dart';
 
+part of union_tabs;
 
 class UnionOuterScrollPosition extends PagePosition implements PageMetrics {
   UnionOuterScrollPosition({

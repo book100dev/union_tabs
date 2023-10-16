@@ -1,10 +1,5 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:union_tabs/src/inner/union_inner_page_view.dart';
-import 'package:union_tabs/src/notification/page_controller.dart';
-// import 'package:union_tabs/src/inner/union_inner_page_view.dart';
-// import 'package:union_tabs/src/notification/page_controller.dart';
+
+part of union_tabs;
 
 /// A page view that displays the widget which corresponds to the currently
 /// selected tab.
@@ -26,6 +21,7 @@ class UnionInnerTabBarView extends StatefulWidget {
     Key? key,
     required this.children,
     this.controller,
+    this.scrollDirection = Axis.horizontal, 
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
@@ -35,6 +31,9 @@ class UnionInnerTabBarView extends StatefulWidget {
   /// If [TabController] is not provided, then the value of [DefaultTabController.of]
   /// will be used.
   final TabController? controller;
+
+  final Axis scrollDirection;
+  //this.scrollDirection = Axis.horizontal,
 
   /// One widget per tab.
   ///
@@ -225,6 +224,7 @@ class _UnionInnerTabBarViewState extends State<UnionInnerTabBarView> {
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: UnionInnerPageView(
+        scrollDirection: widget.scrollDirection,
         dragStartBehavior: widget.dragStartBehavior,
         controller: _pageController,
         physics: widget.physics == null

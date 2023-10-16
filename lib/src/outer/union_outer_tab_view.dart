@@ -1,28 +1,12 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:union_tabs/src/notification/union_scroll_notification.dart';
-import 'union_outer_gesture_delegate.dart';
-import 'union_outer_page_view.dart';
+part of union_tabs;
 
-/// A page view that displays the widget which corresponds to the currently
-/// selected tab.
-///
-/// This widget is typically used in conjunction with a [TabBar].
-///
-/// If a [TabController] is not provided, then there must be a [DefaultTabController]
-/// ancestor.
-///
-/// The tab controller's [TabController.length] must equal the length of the
-/// [children] list and the length of the [TabBar.tabs] list.
-///
-/// To see a sample implementation, visit the [TabController] documentation.
 class UnionOuterTabBarView extends StatefulWidget {
   /// Creates a page view with one child per tab.
   ///
   /// The length of [children] must be the same as the [controller]'s length.
   const UnionOuterTabBarView({
     Key? key,
+    required this.tabBarViewModel,
     required this.children,
     this.controller,
     this.physics,
@@ -30,6 +14,8 @@ class UnionOuterTabBarView extends StatefulWidget {
   })  : assert(children != null),
         assert(dragStartBehavior != null),
         super(key: key);
+
+  final TabBarViewModel tabBarViewModel;
 
   /// This widget's selection and animation state.
   ///
@@ -62,7 +48,7 @@ class UnionOuterTabBarView extends StatefulWidget {
 }
 
 class _UnionOuterTabBarViewState extends State<UnionOuterTabBarView> {
-  TabController ?_controller;
+  TabController? _controller;
   late UnionOuterPageController _pageController;
   late List<Widget> _children;
   late List<Widget> _childrenWithKey;
@@ -108,6 +94,17 @@ class _UnionOuterTabBarViewState extends State<UnionOuterTabBarView> {
   void initState() {
     super.initState();
     _updateChildren();
+    //手动切换tab。子page 的index 默认回到开始
+    widget.tabBarViewModel.onTabIndexChanged = (index) {
+      //切换的时候让干掉系统动画。http://jira.hualala.com/browse/HCD-92
+      _currentIndex = index;
+      _controller!.animation!.removeListener(_handleTabControllerAnimationTick);
+      _pageController.animateToPage(_currentIndex!,
+          duration: Duration(milliseconds: 1), curve: Curves.easeIn);
+      _innerTabBarViewToFirst();
+      if (_controller != null)
+        _controller!.animation!.addListener(_handleTabControllerAnimationTick);
+    };
   }
 
   @override
@@ -157,6 +154,27 @@ class _UnionOuterTabBarViewState extends State<UnionOuterTabBarView> {
     }
   }
 
+  //切换分类默认选中第一个
+  Future<void> _innerTabBarViewToFirst() async {
+    UnionInnerTabBarView innerTabBarView =
+        _children.elementAt(_currentIndex!) as UnionInnerTabBarView;
+    innerTabBarView.controller?.index = 0;
+    // 当前分类之前的要跳到最后一页
+    List<UnionInnerTabBarView> previousArray =
+        _children.sublist(0, _currentIndex).cast<UnionInnerTabBarView>();
+    previousArray.forEach((UnionInnerTabBarView element) {
+      var last = element.children.last;
+      int lastIndex = element.children.indexOf(last);
+      element.controller?.index = lastIndex;
+    });
+    List<UnionInnerTabBarView> lastArray = _children
+        .sublist(_currentIndex!, _children.lastIndexOf(_children.last))
+        .cast<UnionInnerTabBarView>();
+    lastArray.forEach((UnionInnerTabBarView element) {
+      element.controller?.index = 0;
+    });
+  }
+
   Future<void> _warpToCurrentIndex() async {
     if (!mounted) return Future<void>.value();
 
@@ -173,8 +191,9 @@ class _UnionOuterTabBarViewState extends State<UnionOuterTabBarView> {
     }
 
     assert((_currentIndex! - previousIndex).abs() > 1);
-    final int initialPage =
-        _currentIndex! > previousIndex ? _currentIndex! - 1 : _currentIndex! + 1;
+    final int initialPage = _currentIndex! > previousIndex
+        ? _currentIndex! - 1
+        : _currentIndex! + 1;
     final List<Widget> originalChildren = _childrenWithKey;
     setState(() {
       _warpUnderwayCount += 1;
@@ -218,8 +237,8 @@ class _UnionOuterTabBarViewState extends State<UnionOuterTabBarView> {
       _controller!.index = _pageController.page!.round();
       _currentIndex = _controller!.index;
       if (!_controller!.indexIsChanging)
-        _controller!.offset = (_pageController.page! - _controller!.index)
-            .clamp(-1.0, 1.0);
+        _controller!.offset =
+            (_pageController.page! - _controller!.index).clamp(-1.0, 1.0);
     }
     _warpUnderwayCount -= 1;
 
@@ -236,22 +255,28 @@ class _UnionOuterTabBarViewState extends State<UnionOuterTabBarView> {
       }
       return true;
     }());
+
     return NotificationListener<UnionScrollNotification>(
       onNotification: (UnionScrollNotification notification) {
-        return _gestureDelegate!.handleUnionScrollNotification(
-            context, notification);
+        return _gestureDelegate!
+            .handleUnionScrollNotification(context, notification);
       },
       child: NotificationListener<ScrollNotification>(
-        onNotification: _handleScrollNotification,
-        child: UnionOuterPageView(
-          dragStartBehavior: widget.dragStartBehavior,
-          controller: _pageController,
-          physics: widget.physics == null
-              ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())
-              : const PageScrollPhysics().applyTo(widget.physics),
-          children: _childrenWithKey,
-        ),
-      ),
+          onNotification: _handleScrollNotification,
+          child: ViewModelBuilder<TabBarViewModel>.reactive(
+              viewModelBuilder: () => widget.tabBarViewModel,
+              // onViewModelReady: (model) => model.init(),
+              builder: (context, viewModel, child) => UnionOuterPageView(
+                    scrollDirection: viewModel.scrollDirection,
+                    dragStartBehavior: widget.dragStartBehavior,
+                    controller: _pageController,
+                    physics: viewModel.onlyOne
+                        ? const PageScrollPhysics().applyTo(widget.physics ??
+                            PageScrollPhysics()
+                                .applyTo(const ClampingScrollPhysics()))
+                        : NeverScrollableScrollPhysics(),
+                    children: _childrenWithKey,
+                  ))),
     );
   }
 }

@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+part of union_tabs;
 
 enum ScrollDirection { left, right, none }
 

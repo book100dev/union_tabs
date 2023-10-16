@@ -1,17 +1,16 @@
-import 'package:union_tabs/src/notification/page_controller.dart';
-import 'package:union_tabs/src/notification/page_scroll_physics.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 // import 'package:union_tabs/src/notification/page_controller.dart';
 // import 'package:union_tabs/src/notification/page_scroll_physics.dart';
+// import 'package:flutter/gestures.dart';
+// import 'package:flutter/rendering.dart';
+// import 'package:flutter/widgets.dart';
+// import 'union_outer_scroll_position.dart';
+// import 'union_outer_sliver.dart';
 
-import 'union_outer_scroll_position.dart';
-import 'union_outer_sliver.dart';
+part of union_tabs;
 
-final UnionOuterPageController _defaultPageController =
+final UnionOuterPageController _mydefaultPageController =
     UnionOuterPageController();
-const UnionPageScrollPhysics _kPagePhysics = UnionPageScrollPhysics();
+const UnionPageScrollPhysics _mykPagePhysics = UnionPageScrollPhysics();
 
 /// usage like [PageView]
 ///
@@ -39,7 +38,7 @@ class UnionOuterPageView extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
-  })  :  controller = controller ?? _defaultPageController,
+  })  :  controller = controller ?? _mydefaultPageController,
         childrenDelegate = UnionSliverChildListDelegate(children),
         super(key: key);
 
@@ -60,7 +59,7 @@ class UnionOuterPageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
   })  : 
-        controller = controller ?? _defaultPageController,
+        controller = controller ?? _mydefaultPageController,
         childrenDelegate =
             UnionSliverChildBuilderDelegate(itemBuilder, childCount: itemCount!),
         super(key: key);
@@ -179,10 +178,10 @@ class _UnionOuterPageViewState extends State<UnionOuterPageView> {
   @override
   Widget build(BuildContext context) {
     final AxisDirection axisDirection = _getDirection(context);
-    final ScrollPhysics physics = _ForceImplicitScrollPhysics(
+    final ScrollPhysics physics = _AForceImplicitScrollPhysics(
       allowImplicitScrolling: widget.allowImplicitScrolling,
     ).applyTo(widget.pageSnapping
-        ? _kPagePhysics.applyTo(widget.physics!)
+        ? _mykPagePhysics.applyTo(widget.physics!)
         : widget.physics!);
 
     return NotificationListener<ScrollNotification>(
@@ -275,16 +274,16 @@ class UnionOuterPageController extends UnionPageController {
   }
 }
 
-class _ForceImplicitScrollPhysics extends ScrollPhysics {
-  const _ForceImplicitScrollPhysics({
+class _AForceImplicitScrollPhysics extends ScrollPhysics {
+  const _AForceImplicitScrollPhysics({
     required this.allowImplicitScrolling,
     ScrollPhysics? parent,
   })  :
         super(parent: parent);
 
   @override
-  _ForceImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return _ForceImplicitScrollPhysics(
+  _AForceImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _AForceImplicitScrollPhysics(
       allowImplicitScrolling: allowImplicitScrolling,
       parent: buildParent(ancestor),
     );

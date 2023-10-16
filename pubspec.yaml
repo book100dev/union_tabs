@@ -1,15 +1,16 @@
 name: union_tabs
 description: A new Flutter package project.
-version: 0.0.1
-homepage:
+version: 1.0.0
+homepage: union_tabs home
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: '>=2.19.0 <3.0.0'
   flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  stacked: ^3.1.0+3
 
 dev_dependencies:
   flutter_test:

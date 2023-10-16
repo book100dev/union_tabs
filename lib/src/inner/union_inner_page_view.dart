@@ -1,23 +1,11 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
-import 'package:union_tabs/src/notification/page_controller.dart';
-import 'package:union_tabs/src/notification/page_scroll_physics.dart';
-import 'union_inner_scrollable.dart';
-import 'union_tabs_provider.dart';
 
-// Having this global (mutable) page controller is a bit of a hack. We need it
-// to plumb in the factory for _UnionPagePosition, but it will end up accumulating
-// a large list of scroll positions. As long as you don't try to actually
-// control the scroll positions, everything should be fine.
-final UnionPageController _defaultPageController = UnionPageController();
-const UnionPageScrollPhysics _kPagePhysics = UnionPageScrollPhysics();
+part of union_tabs;
 
 class _ForceImplicitScrollPhysics extends ScrollPhysics {
   const _ForceImplicitScrollPhysics({
     required this.allowImplicitScrolling,
     ScrollPhysics? parent,
-  })  : 
+  }) : assert(allowImplicitScrolling != null),
         super(parent: parent);
 
   @override
@@ -32,45 +20,11 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
   final bool allowImplicitScrolling;
 }
 
-/// A scrollable list that works page by page.
-///
-/// Each child of a page view is forced to be the same size as the viewport.
-///
-/// You can use a [UnionPageController] to control which page is visible in the view.
-/// In addition to being able to control the pixel offset of the content inside
-/// the [UnionInnerPageView], a [UnionPageController] also lets you control the offset in terms
-/// of pages, which are increments of the viewport size.
-///
-/// The [UnionPageController] can also be used to control the
-/// [UnionPageController.initialPage], which determines which page is shown when the
-/// [UnionInnerPageView] is first constructed, and the [PageController.viewportFraction],
-/// which determines the size of the pages as a fraction of the viewport size.
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
-///
-/// See also:
-///
-///  * [UnionPageController], which controls which page is visible in the view.
-///  * [SingleChildScrollView], when you need to make a single child scrollable.
-///  * [ListView], for a scrollable list of boxes.
-///  * [GridView], for a scrollable grid of boxes.
-///  * [ScrollNotification] and [NotificationListener], which can be used to watch
-///    the scroll position without using a [ScrollController].
+final UnionPageController _defaultPageController = UnionPageController();
+const UnionPageScrollPhysics _kPagePhysics = UnionPageScrollPhysics();
+
 class UnionInnerPageView extends StatefulWidget {
-  /// Creates a scrollable list that works page by page from an explicit [List]
-  /// of widgets.
-  ///
-  /// This constructor is appropriate for page views with a small number of
-  /// children because constructing the [List] requires doing work for every
-  /// child that could possibly be displayed in the page view, instead of just
-  /// those children that are actually visible.
-  ///
-  /// {@template flutter.widgets.pageView.allowImplicitScrolling}
-  /// The [allowImplicitScrolling] parameter must not be null. If true, the
-  /// [PageView] will participate in accessibility scrolling more like a
-  /// [ListView], where implicit scroll actions will move to the next page
-  /// rather than into the contents of the [PageView].
-  /// {@endtemplate}
+
   UnionInnerPageView({
     Key? key,
     this.scrollDirection = Axis.horizontal,
@@ -84,28 +38,14 @@ class UnionInnerPageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(allowImplicitScrolling != null),
+    this.scrollBehavior,
+    this.padEnds = true,
+  }) : assert(allowImplicitScrolling != null),
         assert(clipBehavior != null),
         controller = controller ?? _defaultPageController,
         childrenDelegate = SliverChildListDelegate(children),
         super(key: key);
 
-  /// Creates a scrollable list that works page by page using widgets that are
-  /// created on demand.
-  ///
-  /// This constructor is appropriate for page views with a large (or infinite)
-  /// number of children because the builder is called only for those children
-  /// that are actually visible.
-  ///
-  /// Providing a non-null [itemCount] lets the [UnionInnerPageView] compute the maximum
-  /// scroll extent.
-  ///
-  /// [itemBuilder] will be called only with indices greater than or equal to
-  /// zero and less than [itemCount].
-  ///
-  /// [UnionInnerPageView.builder] by default does not support child reordering. If
-  /// you are planning to change child order at a later time, consider using
-  /// [UnionInnerPageView] or [UnionInnerPageView.custom].
   UnionInnerPageView.builder({
     Key? key,
     this.scrollDirection = Axis.horizontal,
@@ -115,98 +55,24 @@ class UnionInnerPageView extends StatefulWidget {
     this.pageSnapping = true,
     this.onPageChanged,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(allowImplicitScrolling != null),
+    this.scrollBehavior,
+    this.padEnds = true,
+  }) : assert(allowImplicitScrolling != null),
         assert(clipBehavior != null),
         controller = controller ?? _defaultPageController,
-        childrenDelegate =
-            SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
+        childrenDelegate = SliverChildBuilderDelegate(
+          itemBuilder,
+          findChildIndexCallback: findChildIndexCallback,
+          childCount: itemCount,
+        ),
         super(key: key);
 
-  /// Creates a scrollable list that works page by page with a custom child
-  /// model.
-  ///
-  /// {@tool sample}
-  ///
-  /// This [UnionInnerPageView] uses a custom [SliverChildBuilderDelegate] to support child
-  /// reordering.
-  ///
-  /// ```dart
-  /// class MyPageView extends StatefulWidget {
-  ///   @override
-  ///   _MyPageViewState createState() => _MyPageViewState();
-  /// }
-  ///
-  /// class _MyPageViewState extends State<MyPageView> {
-  ///   List<String> items = <String>['1', '2', '3', '4', '5'];
-  ///
-  ///   void _reverse() {
-  ///     setState(() {
-  ///       items = items.reversed.toList();
-  ///     });
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Scaffold(
-  ///       body: SafeArea(
-  ///         child: UnionPageView.custom(
-  ///           childrenDelegate: SliverChildBuilderDelegate(
-  ///             (BuildContext context, int index) {
-  ///               return KeepAlive(
-  ///                 data: items[index],
-  ///                 key: ValueKey<String>(items[index]),
-  ///               );
-  ///             },
-  ///             childCount: items.length,
-  ///             findChildIndexCallback: (Key key) {
-  ///               final ValueKey valueKey = key;
-  ///               final String data = valueKey.value;
-  ///               return items.indexOf(data);
-  ///             }
-  ///           ),
-  ///         ),
-  ///       ),
-  ///       bottomNavigationBar: BottomAppBar(
-  ///         child: Row(
-  ///           mainAxisAlignment: MainAxisAlignment.center,
-  ///           children: <Widget>[
-  ///             FlatButton(
-  ///               onPressed: () => _reverse(),
-  ///               child: Text('Reverse items'),
-  ///             ),
-  ///           ],
-  ///         ),
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  ///
-  /// class KeepAlive extends StatefulWidget {
-  ///   const KeepAlive({Key key, this.data}) : super(key: key);
-  ///
-  ///   final String data;
-  ///
-  ///   @override
-  ///   _KeepAliveState createState() => _KeepAliveState();
-  /// }
-  ///
-  /// class _KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin{
-  ///   @override
-  ///   bool get wantKeepAlive => true;
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     super.build(context);
-  ///     return Text(widget.data);
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
   UnionInnerPageView.custom({
     Key? key,
     this.scrollDirection = Axis.horizontal,
@@ -220,7 +86,9 @@ class UnionInnerPageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(childrenDelegate != null),
+    this.scrollBehavior,
+    this.padEnds = true,
+  }) : assert(childrenDelegate != null),
         assert(allowImplicitScrolling != null),
         assert(clipBehavior != null),
         controller = controller ?? _defaultPageController,
@@ -271,21 +139,29 @@ class UnionInnerPageView extends StatefulWidget {
   /// user stops dragging the page view.
   ///
   /// The physics are modified to snap to page boundaries using
-  /// [UnionInnerPageScrollPhysics] prior to being used.
+  /// [PageScrollPhysics] prior to being used.
+  ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
   ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
 
   /// Set to false to disable page snapping, useful for custom scroll behavior.
+  ///
+  /// If the [padEnds] is false and [PageController.viewportFraction] < 1.0,
+  /// the page will snap to the beginning of the viewport; otherwise, the page
+  /// will snap to the center of the viewport.
   final bool pageSnapping;
 
   /// Called whenever the page in the center of the viewport changes.
   final ValueChanged<int>? onPageChanged;
 
-  /// A delegate that provides the children for the [UnionInnerPageView].
+  /// A delegate that provides the children for the [PageView].
   ///
-  /// The [UnionInnerPageView.custom] constructor lets you specify this delegate
-  /// explicitly. The [UnionInnerPageView] and [UnionInnerPageView.builder] constructors create a
+  /// The [PageView.custom] constructor lets you specify this delegate
+  /// explicitly. The [PageView] and [PageView.builder] constructors create a
   /// [childrenDelegate] that wraps the given [List] and [IndexedWidgetBuilder],
   /// respectively.
   final SliverChildDelegate childrenDelegate;
@@ -293,13 +169,35 @@ class UnionInnerPageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  ///
+  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
+  /// [ScrollPhysics] is provided in [physics], it will take precedence,
+  /// followed by [scrollBehavior], and then the inherited ancestor
+  /// [ScrollBehavior].
+  ///
+  /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
+  /// modified by default to not apply a [Scrollbar].
+  final ScrollBehavior? scrollBehavior;
+
+  /// Whether to add padding to both ends of the list.
+  ///
+  /// If this is set to true and [PageController.viewportFraction] < 1.0, padding will be added
+  /// such that the first and last child slivers will be in the center of
+  /// the viewport when scrolled all the way to the start or end, respectively.
+  ///
+  /// If [PageController.viewportFraction] >= 1.0, this property has no effect.
+  ///
+  /// This property defaults to true and must not be null.
+  final bool padEnds;
+
   @override
-  _UnionInnerPageViewState createState() => _UnionInnerPageViewState();
+  State<UnionInnerPageView> createState() => _UnionInnerPageViewState();
 }
 
 class _UnionInnerPageViewState extends State<UnionInnerPageView> {
@@ -316,11 +214,8 @@ class _UnionInnerPageViewState extends State<UnionInnerPageView> {
       case Axis.horizontal:
         assert(debugCheckHasDirectionality(context));
         final TextDirection textDirection = Directionality.of(context);
-        final AxisDirection axisDirection =
-            textDirectionToAxisDirection(textDirection);
-        return widget.reverse
-            ? flipAxisDirection(axisDirection)
-            : axisDirection;
+        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
+        return widget.reverse ? flipAxisDirection(axisDirection) : axisDirection;
       case Axis.vertical:
         return widget.reverse ? AxisDirection.up : AxisDirection.down;
     }
@@ -333,59 +228,19 @@ class _UnionInnerPageViewState extends State<UnionInnerPageView> {
       allowImplicitScrolling: widget.allowImplicitScrolling,
     ).applyTo(
       widget.pageSnapping
-        ? _kPagePhysics.applyTo(widget.physics!)
-        : widget.physics!,
+          ? _kPagePhysics.applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
+          : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
     );
-    /**
-     * .applyTo(
-      widget.pageSnapping
-        ? _kPagePhysics.applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
-        : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
-    );
-     */
-// return UnionInnerScrollable(
-//           dragStartBehavior: widget.dragStartBehavior,
-//           axisDirection: axisDirection,
-//           controller: widget.controller,
-//           physics: physics,
-//           restorationId: widget.restorationId,
-//           viewportBuilder: (BuildContext context, ViewportOffset position) {
-//             return Viewport(
-//               // TODO(dnfield): we should provide a way to set cacheExtent
-//               // independent of implicit scrolling:
-//               // https://github.com/flutter/flutter/issues/45632
-//               cacheExtent: widget.allowImplicitScrolling ? 1.0 : 0.0,
-//               cacheExtentStyle: CacheExtentStyle.viewport,
-//               axisDirection: axisDirection,
-//               offset: position,
-//               clipBehavior: widget.clipBehavior,
-//               slivers: <Widget>[
-//                 SliverFillViewport(
-//                   viewportFraction: widget.controller.viewportFraction,
-//                   delegate: widget.childrenDelegate,
-//                 ),
-//               ],
-//             );
-//           },
-//         );
     return TabBarOverScrollStateProvider(builder: (context) {
       return NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification notification) {
-          if (notification.depth == 0 &&
-              widget.onPageChanged != null &&
-              notification is ScrollUpdateNotification) {
+          if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
             final PageMetrics metrics = notification.metrics as PageMetrics;
             final int currentPage = metrics.page!.round();
             if (currentPage != _lastReportedPage) {
               _lastReportedPage = currentPage;
               widget.onPageChanged!(currentPage);
             }
-          } else if (notification is OverscrollNotification) {
-            TabBarOverScrollStateProvider.of(notification.context!)!
-                .setOverScroll(true);
-          } else if (notification is ScrollEndNotification) {
-            TabBarOverScrollStateProvider.of(notification.context!)!
-                .setOverScroll(false);
           }
           return false;
         },
@@ -395,6 +250,7 @@ class _UnionInnerPageViewState extends State<UnionInnerPageView> {
           controller: widget.controller,
           physics: physics,
           restorationId: widget.restorationId,
+          scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
           viewportBuilder: (BuildContext context, ViewportOffset position) {
             return Viewport(
               // TODO(dnfield): we should provide a way to set cacheExtent
@@ -409,6 +265,7 @@ class _UnionInnerPageViewState extends State<UnionInnerPageView> {
                 SliverFillViewport(
                   viewportFraction: widget.controller.viewportFraction,
                   delegate: widget.childrenDelegate,
+                  padEnds: widget.padEnds,
                 ),
               ],
             );
@@ -421,20 +278,11 @@ class _UnionInnerPageViewState extends State<UnionInnerPageView> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description
-        .add(EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
-    description.add(
-        FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));
-    description.add(DiagnosticsProperty<UnionPageController>(
-        'controller', widget.controller,
-        showName: false));
-    description.add(DiagnosticsProperty<ScrollPhysics>(
-        'physics', widget.physics,
-        showName: false));
-    description.add(FlagProperty('pageSnapping',
-        value: widget.pageSnapping, ifFalse: 'snapping disabled'));
-    description.add(FlagProperty('allowImplicitScrolling',
-        value: widget.allowImplicitScrolling,
-        ifTrue: 'allow implicit scrolling'));
+    description.add(EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
+    description.add(FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));
+    description.add(DiagnosticsProperty<UnionPageController>('controller', widget.controller, showName: false));
+    description.add(DiagnosticsProperty<ScrollPhysics>('physics', widget.physics, showName: false));
+    description.add(FlagProperty('pageSnapping', value: widget.pageSnapping, ifFalse: 'snapping disabled'));
+    description.add(FlagProperty('allowImplicitScrolling', value: widget.allowImplicitScrolling, ifTrue: 'allow implicit scrolling'));
   }
 }

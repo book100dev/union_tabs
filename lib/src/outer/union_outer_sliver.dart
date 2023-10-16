@@ -1,9 +1,6 @@
-import 'package:union_tabs/src/notification/union_scroll_notification.dart';
-import 'package:flutter/widgets.dart';
-// import 'package:union_tabs/src/notification/union_scroll_notification.dart';
 
-/// A delegate that supplies children for slivers using a builder callback.
-/// [SliverChildListDelegate] override build, intend to send [UnionOverscrollNotification].
+part of union_tabs;
+
 class UnionSliverChildListDelegate extends SliverChildListDelegate {
   UnionSliverChildListDelegate(
     List<Widget> children, {

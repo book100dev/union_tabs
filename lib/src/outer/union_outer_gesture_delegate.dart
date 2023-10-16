@@ -1,8 +1,7 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:union_tabs/src/notification/union_scroll_notification.dart';
-import 'union_outer_page_view.dart';
+
+
+part of union_tabs;
+
 
 class UnionOuterGestureDelegate {
   UnionOuterPageController? pageController;
@@ -33,11 +32,14 @@ class UnionOuterGestureDelegate {
 
       /// 计算用户滑动
       /// update the offset, to update the indicator's position
-      MediaQueryData data = MediaQuery.of(context);
-      tabController?.offset =
-          (tabController!.offset + notification.overscroll / data.size.width)
-              .clamp(-1.0, 1.0);
-
+      try{
+        MediaQueryData data = MediaQuery.of(context);
+        tabController?.offset =
+            (tabController!.offset + notification.overscroll / data.size.width)
+                .clamp(-1.0, 1.0);
+      }catch(e) {
+        print('滑动的时候 offset error：$e');
+      }
       if (notification.dragDetails != null) {
         /// update the viewpager's position
         _drag?.update(notification.dragDetails!);
@@ -62,9 +64,11 @@ class UnionOuterGestureDelegate {
         /// 计算用户滑动
         /// update the offset, to update the indicator's position
         MediaQueryData data = MediaQuery.of(context);
-        tabController?.offset = (tabController!.offset +
-                notification.dragDetails!.delta.dx / data.size.width)
-            .clamp(-1.0, 1.0);
+        if(!tabController!.indexIsChanging) {
+          tabController?.offset = (tabController!.offset +
+              notification.dragDetails!.delta.dx / data.size.width)
+              .clamp(-1.0, 1.0);
+        }
       }
     }
     return true;

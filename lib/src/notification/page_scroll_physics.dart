@@ -1,14 +1,14 @@
-import 'package:flutter/widgets.dart';
 
-import 'scroll_position.dart';
+part of union_tabs;
+
 
 class UnionPageScrollPhysics extends ScrollPhysics {
-  /// Creates physics for a [UnionInnerPageView].
+  /// Creates physics for a [PageView].
   const UnionPageScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
-  UnionPageScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return UnionPageScrollPhysics(parent: buildParent(ancestor));
+  PageScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return PageScrollPhysics(parent: buildParent(ancestor));
   }
 
   double _getPage(ScrollMetrics position) {

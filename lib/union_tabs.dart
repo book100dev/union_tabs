@@ -3,8 +3,6 @@ library union_tabs;
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/gestures.dart';
@@ -21,6 +19,7 @@ part 'src/inner/union_inner_scrollable.dart';
 part 'src/inner/union_inner_tab_view.dart';
 part 'src/inner/union_tabs_provider.dart';
 part 'src/inner/tab_bar_view_model.dart';
+part 'src/notification/page_behavior.dart';
 part 'src/notification/page_controller.dart';
 part 'src/notification/page_scroll_physics.dart';
 part 'src/notification/scroll_position.dart';

@@ -1,4 +1,3 @@
-
 part of union_tabs;
 
 /// A page view that displays the widget which corresponds to the currently
@@ -21,7 +20,7 @@ class UnionInnerTabBarView extends StatefulWidget {
     Key? key,
     required this.children,
     this.controller,
-    this.scrollDirection = Axis.horizontal, 
+    this.scrollDirection = Axis.horizontal,
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
@@ -222,16 +221,17 @@ class _UnionInnerTabBarViewState extends State<UnionInnerTabBarView> {
       return true;
     }());
     return NotificationListener<ScrollNotification>(
-      onNotification: _handleScrollNotification,
-      child: UnionInnerPageView(
-        scrollDirection: widget.scrollDirection,
-        dragStartBehavior: widget.dragStartBehavior,
-        controller: _pageController,
-        physics: widget.physics == null
-            ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())
-            : const PageScrollPhysics().applyTo(widget.physics),
-        children: _childrenWithKey,
-      ),
-    );
+        onNotification: _handleScrollNotification,
+        child: UnionInnerPageView(
+          scrollBehavior: PageBehavior(),
+          scrollDirection: widget.scrollDirection,
+          dragStartBehavior: widget.dragStartBehavior,
+          controller: _pageController,
+          physics: widget.physics == null
+              ? const PageScrollPhysics()
+                  .applyTo(const ClampingScrollPhysics())
+              : const PageScrollPhysics().applyTo(widget.physics),
+          children: _childrenWithKey,
+        ));
   }
 }

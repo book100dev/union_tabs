@@ -1,7 +1,4 @@
-
-
 part of union_tabs;
-
 
 class UnionOuterGestureDelegate {
   UnionOuterPageController? pageController;
@@ -32,12 +29,21 @@ class UnionOuterGestureDelegate {
 
       /// 计算用户滑动
       /// update the offset, to update the indicator's position
-      try{
+      try {
+        Axis? axis = pageController?.position.axis;
         MediaQueryData data = MediaQuery.of(context);
-        tabController?.offset =
-            (tabController!.offset + notification.overscroll / data.size.width)
-                .clamp(-1.0, 1.0);
-      }catch(e) {
+        if (axis == Axis.horizontal) {
+          //横屏
+          tabController?.offset = (tabController!.offset +
+                  notification.overscroll / data.size.width)
+              .clamp(-1.0, 1.0);
+        } else {
+          //竖屏
+          tabController?.offset = (tabController!.offset +
+                  notification.overscroll / data.size.height)
+              .clamp(-1.0, 1.0);
+        }
+      } catch (e) {
         print('滑动的时候 offset error：$e');
       }
       if (notification.dragDetails != null) {
@@ -47,9 +53,16 @@ class UnionOuterGestureDelegate {
     } else if (notification is UnionScrollEndNotification) {
       _drag?.cancel();
       _drag = null;
-      double dx = notification.dragDetails?.velocity.pixelsPerSecond.dx ?? 0;
-      if (dx != 0) {
-        int offset = dx > 0 ? -1 : 1;
+      double xx = 0;
+      Axis? axis = pageController?.position.axis;
+      //MediaQueryData data = MediaQuery.of(context);
+      if (axis == Axis.horizontal) {
+        xx = notification.dragDetails?.velocity.pixelsPerSecond.dx ?? 0;
+      } else {
+        xx = notification.dragDetails?.velocity.pixelsPerSecond.dy ?? 0;
+      }
+      if (xx != 0) {
+        int offset = xx > 0 ? -1 : 1;
         int index = tabController!.index + offset;
         if (index < 0) index = 0;
         if (index >= tabController!.length) index = tabController!.length - 1;
@@ -57,19 +70,26 @@ class UnionOuterGestureDelegate {
         tabController?.animateTo(index, duration: Duration(milliseconds: 500));
       }
     } else if (notification is UnionScrollUpdateNotification) {
-      if (_drag != null && notification.dragDetails != null) {
-        /// update the viewpager's position
-        _drag?.update(notification.dragDetails!);
+      // if (_drag != null && notification.dragDetails != null) {
+      //   /// update the viewpager's position
+      //   _drag?.update(notification.dragDetails!);
 
-        /// 计算用户滑动
-        /// update the offset, to update the indicator's position
-        MediaQueryData data = MediaQuery.of(context);
-        if(!tabController!.indexIsChanging) {
-          tabController?.offset = (tabController!.offset +
-              notification.dragDetails!.delta.dx / data.size.width)
-              .clamp(-1.0, 1.0);
-        }
-      }
+      //   /// 计算用户滑动
+      //   /// update the offset, to update the indicator's position
+      //   MediaQueryData data = MediaQuery.of(context);
+      //   if (!tabController!.indexIsChanging) {
+      //     Axis? axis = pageController?.position.axis;
+      //     if (axis == Axis.horizontal) {
+      //       tabController?.offset = (tabController!.offset +
+      //               notification.dragDetails!.delta.dx / data.size.width)
+      //           .clamp(-1.0, 1.0);
+      //     } else {
+      //       tabController?.offset = (tabController!.offset +
+      //               notification.dragDetails!.delta.dy / data.size.height)
+      //           .clamp(-1.0, 1.0);
+      //     }
+      //   }
+      // }
     }
     return true;
   }

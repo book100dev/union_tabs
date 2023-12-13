@@ -257,26 +257,29 @@ class _UnionOuterTabBarViewState extends State<UnionOuterTabBarView> {
     }());
 
     return NotificationListener<UnionScrollNotification>(
-      onNotification: (UnionScrollNotification notification) {
-        return _gestureDelegate!
-            .handleUnionScrollNotification(context, notification);
-      },
-      child: NotificationListener<ScrollNotification>(
+        onNotification: (UnionScrollNotification notification) {
+          return _gestureDelegate!
+              .handleUnionScrollNotification(context, notification);
+        },
+        child: NotificationListener<ScrollNotification>(
           onNotification: _handleScrollNotification,
           child: ViewModelBuilder<TabBarViewModel>.reactive(
               viewModelBuilder: () => widget.tabBarViewModel,
               // onViewModelReady: (model) => model.init(),
               builder: (context, viewModel, child) => UnionOuterPageView(
-                    scrollDirection: viewModel.scrollDirection,
-                    dragStartBehavior: widget.dragStartBehavior,
-                    controller: _pageController,
-                    physics: viewModel.onlyOne
-                        ? const PageScrollPhysics().applyTo(widget.physics ??
-                            PageScrollPhysics()
-                                .applyTo(const ClampingScrollPhysics()))
-                        : NeverScrollableScrollPhysics(),
-                    children: _childrenWithKey,
-                  ))),
-    );
+                scrollDirection: viewModel.scrollDirection,
+                dragStartBehavior: widget.dragStartBehavior,
+                scrollBehavior: PageBehavior(),
+                controller: _pageController,
+                physics: 
+                //viewModel.onlyOne ? null :NeverScrollableScrollPhysics(),
+                viewModel.onlyOne
+                    ? const PageScrollPhysics().applyTo(widget.physics ??
+                        PageScrollPhysics()
+                            .applyTo(const ClampingScrollPhysics()))
+                    : NeverScrollableScrollPhysics(),
+                children: _childrenWithKey,
+              )),
+        ));
   }
 }

@@ -1,11 +1,10 @@
-
 part of union_tabs;
 
 class _ForceImplicitScrollPhysics extends ScrollPhysics {
   const _ForceImplicitScrollPhysics({
     required this.allowImplicitScrolling,
     ScrollPhysics? parent,
-  }) : assert(allowImplicitScrolling != null),
+  })  : assert(allowImplicitScrolling != null),
         super(parent: parent);
 
   @override
@@ -20,11 +19,10 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
   final bool allowImplicitScrolling;
 }
 
-final UnionPageController _defaultPageController = UnionPageController();
+final UnionPageController _defaultPageController = UnionPageController(pageCount: 0);
 const UnionPageScrollPhysics _kPagePhysics = UnionPageScrollPhysics();
 
 class UnionInnerPageView extends StatefulWidget {
-
   UnionInnerPageView({
     Key? key,
     this.scrollDirection = Axis.horizontal,
@@ -40,7 +38,7 @@ class UnionInnerPageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : assert(allowImplicitScrolling != null),
+  })  : assert(allowImplicitScrolling != null),
         assert(clipBehavior != null),
         controller = controller ?? _defaultPageController,
         childrenDelegate = SliverChildListDelegate(children),
@@ -63,7 +61,7 @@ class UnionInnerPageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : assert(allowImplicitScrolling != null),
+  })  : assert(allowImplicitScrolling != null),
         assert(clipBehavior != null),
         controller = controller ?? _defaultPageController,
         childrenDelegate = SliverChildBuilderDelegate(
@@ -88,7 +86,7 @@ class UnionInnerPageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : assert(childrenDelegate != null),
+  })  : assert(childrenDelegate != null),
         assert(allowImplicitScrolling != null),
         assert(clipBehavior != null),
         controller = controller ?? _defaultPageController,
@@ -214,8 +212,11 @@ class _UnionInnerPageViewState extends State<UnionInnerPageView> {
       case Axis.horizontal:
         assert(debugCheckHasDirectionality(context));
         final TextDirection textDirection = Directionality.of(context);
-        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
-        return widget.reverse ? flipAxisDirection(axisDirection) : axisDirection;
+        final AxisDirection axisDirection =
+            textDirectionToAxisDirection(textDirection);
+        return widget.reverse
+            ? flipAxisDirection(axisDirection)
+            : axisDirection;
       case Axis.vertical:
         return widget.reverse ? AxisDirection.up : AxisDirection.down;
     }
@@ -228,13 +229,16 @@ class _UnionInnerPageViewState extends State<UnionInnerPageView> {
       allowImplicitScrolling: widget.allowImplicitScrolling,
     ).applyTo(
       widget.pageSnapping
-          ? _kPagePhysics.applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
+          ? _kPagePhysics.applyTo(widget.physics ??
+              widget.scrollBehavior?.getScrollPhysics(context))
           : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
     );
     return TabBarOverScrollStateProvider(builder: (context) {
       return NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification notification) {
-          if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
+          if (notification.depth == 0 &&
+              widget.onPageChanged != null &&
+              notification is ScrollUpdateNotification) {
             final PageMetrics metrics = notification.metrics as PageMetrics;
             final int currentPage = metrics.page!.round();
             if (currentPage != _lastReportedPage) {
@@ -250,7 +254,8 @@ class _UnionInnerPageViewState extends State<UnionInnerPageView> {
           controller: widget.controller,
           physics: physics,
           restorationId: widget.restorationId,
-          scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
+          scrollBehavior: widget.scrollBehavior ??
+              ScrollConfiguration.of(context).copyWith(scrollbars: false),
           viewportBuilder: (BuildContext context, ViewportOffset position) {
             return Viewport(
               // TODO(dnfield): we should provide a way to set cacheExtent
@@ -278,11 +283,20 @@ class _UnionInnerPageViewState extends State<UnionInnerPageView> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
-    description.add(FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));
-    description.add(DiagnosticsProperty<UnionPageController>('controller', widget.controller, showName: false));
-    description.add(DiagnosticsProperty<ScrollPhysics>('physics', widget.physics, showName: false));
-    description.add(FlagProperty('pageSnapping', value: widget.pageSnapping, ifFalse: 'snapping disabled'));
-    description.add(FlagProperty('allowImplicitScrolling', value: widget.allowImplicitScrolling, ifTrue: 'allow implicit scrolling'));
+    description
+        .add(EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
+    description.add(
+        FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));
+    description.add(DiagnosticsProperty<UnionPageController>(
+        'controller', widget.controller,
+        showName: false));
+    description.add(DiagnosticsProperty<ScrollPhysics>(
+        'physics', widget.physics,
+        showName: false));
+    description.add(FlagProperty('pageSnapping',
+        value: widget.pageSnapping, ifFalse: 'snapping disabled'));
+    description.add(FlagProperty('allowImplicitScrolling',
+        value: widget.allowImplicitScrolling,
+        ifTrue: 'allow implicit scrolling'));
   }
 }

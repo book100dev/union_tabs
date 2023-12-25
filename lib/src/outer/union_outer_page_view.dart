@@ -38,7 +38,7 @@ class UnionOuterPageView extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
-  })  :  controller = controller ?? _mydefaultPageController,
+  })  : controller = controller ?? _mydefaultPageController,
         childrenDelegate = UnionSliverChildListDelegate(children),
         super(key: key);
 
@@ -58,10 +58,9 @@ class UnionOuterPageView extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
-  })  : 
-        controller = controller ?? _mydefaultPageController,
-        childrenDelegate =
-            UnionSliverChildBuilderDelegate(itemBuilder, childCount: itemCount!),
+  })  : controller = controller ?? _mydefaultPageController,
+        childrenDelegate = UnionSliverChildBuilderDelegate(itemBuilder,
+            childCount: itemCount!),
         super(key: key);
 
   /// Controls whether the widget's pages will respond to
@@ -136,7 +135,7 @@ class UnionOuterPageView extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
- /// {@macro flutter.widgets.shadow.scrollBehavior}
+  /// {@macro flutter.widgets.shadow.scrollBehavior}
   ///
   /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
   /// [ScrollPhysics] is provided in [physics], it will take precedence,
@@ -255,7 +254,10 @@ class UnionOuterPageController extends UnionPageController {
     int initialPage = 0,
     bool keepPage = true,
     double viewportFraction = 1.0,
+    int count = 0,
   }) : super(
+            condition: false,
+            pageCount: count,
             initialPage: initialPage,
             keepPage: keepPage,
             viewportFraction: viewportFraction);
@@ -278,8 +280,7 @@ class _AForceImplicitScrollPhysics extends ScrollPhysics {
   const _AForceImplicitScrollPhysics({
     required this.allowImplicitScrolling,
     ScrollPhysics? parent,
-  })  :
-        super(parent: parent);
+  }) : super(parent: parent);
 
   @override
   _AForceImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {

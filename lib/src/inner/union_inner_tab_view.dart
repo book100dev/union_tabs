@@ -16,14 +16,18 @@ class UnionInnerTabBarView extends StatefulWidget {
   /// Creates a page view with one child per tab.
   ///
   /// The length of [children] must be the same as the [controller]'s length.
-  const UnionInnerTabBarView({
-    Key? key,
-    required this.children,
-    this.controller,
-    this.scrollDirection = Axis.horizontal,
-    this.physics,
-    this.dragStartBehavior = DragStartBehavior.start,
-  }) : super(key: key);
+  const UnionInnerTabBarView(
+      {Key? key,
+      required this.title,
+      required this.children,
+      this.controller,
+      this.scrollDirection = Axis.horizontal,
+      this.physics,
+      this.dragStartBehavior = DragStartBehavior.start,
+      this.baseViewModel})
+      : super(key: key);
+
+  final String title;
 
   /// This widget's selection and animation state.
   ///
@@ -54,6 +58,8 @@ class UnionInnerTabBarView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  final UnionInnerTabViewModel? baseViewModel;
+
   @override
   _UnionInnerTabBarViewState createState() => _UnionInnerTabBarViewState();
 }
@@ -70,7 +76,6 @@ class _UnionInnerTabBarViewState extends State<UnionInnerTabBarView> {
   // dispose the old one. In that case the old controller's animation will be
   // null and should not be accessed.
   bool get _controllerIsValid => _controller?.animation != null;
-
   void _updateTabController() {
     final TabController? newController =
         widget.controller ?? DefaultTabController.of(context);
@@ -105,7 +110,10 @@ class _UnionInnerTabBarViewState extends State<UnionInnerTabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller?.index;
-    _pageController = UnionPageController(initialPage: _currentIndex ?? 0);
+    _pageController = UnionPageController(
+        initialPage: _currentIndex ?? 0,
+        title: widget.title,
+        pageCount: _controller?.length ?? 0);
   }
 
   @override
@@ -220,6 +228,27 @@ class _UnionInnerTabBarViewState extends State<UnionInnerTabBarView> {
       }
       return true;
     }());
+
+    return ViewModelBuilder<UnionInnerTabViewModel>.nonReactive(
+        fireOnViewModelReadyOnce: true,
+        disposeViewModel: false,
+        initialiseSpecialViewModelsOnce: true,
+        viewModelBuilder: () => widget.baseViewModel!,
+        builder: (context, viewModel, child) =>
+            NotificationListener<ScrollNotification>(
+                onNotification: _handleScrollNotification,
+                child: UnionInnerPageView(
+                  scrollBehavior: PageBehavior(),
+                  scrollDirection: widget.scrollDirection,
+                  dragStartBehavior: widget.dragStartBehavior,
+                  controller: _pageController,
+                  physics: widget.physics == null
+                      ? const PageScrollPhysics()
+                          .applyTo(const ClampingScrollPhysics())
+                      : const PageScrollPhysics().applyTo(widget.physics),
+                  children: _childrenWithKey,
+                )));
+
     return NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
         child: UnionInnerPageView(
@@ -228,8 +257,7 @@ class _UnionInnerTabBarViewState extends State<UnionInnerTabBarView> {
           dragStartBehavior: widget.dragStartBehavior,
           controller: _pageController,
           physics: widget.physics == null
-              ? const PageScrollPhysics()
-                  .applyTo(const ClampingScrollPhysics())
+              ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())
               : const PageScrollPhysics().applyTo(widget.physics),
           children: _childrenWithKey,
         ));

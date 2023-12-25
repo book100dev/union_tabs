@@ -56,6 +56,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "get",
+      "rootUri": "file:///Users/songjie/.pub-cache/hosted/pub.flutter-io.cn/get-4.6.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
       "name": "get_it",
       "rootUri": "file:///Users/songjie/.pub-cache/hosted/pub.flutter-io.cn/get_it-7.2.0",
       "packageUri": "lib/",
@@ -182,7 +188,7 @@
       "languageVersion": "2.19"
     }
   ],
-  "generated": "2023-12-25T01:55:07.495100Z",
+  "generated": "2023-12-22T03:12:37.573395Z",
   "generator": "pub",
   "generatorVersion": "2.19.6"
 }

@@ -224,7 +224,21 @@ class _UnionOuterTabBarViewState extends State<UnionOuterTabBarView> {
 
     if (notification.depth != 0) return false;
 
+    if (notification is ScrollStartNotification) {
+      UnionInnerTabBarView innerTabBarView =
+          _children[widget.controller!.index] as UnionInnerTabBarView;
+      //innerTabBarView.pa
+      //ss.build(context);
+      _children.forEach((element) {
+        UnionInnerTabBarView aaa = element as UnionInnerTabBarView;
+        aaa.baseViewModel?.rebuild(scroll: true);
+      });
+      innerTabBarView.baseViewModel?.rebuild(scroll: false);
+      print('ss');
+    }
+
     _warpUnderwayCount += 1;
+
     if (notification is ScrollUpdateNotification &&
         !_controller!.indexIsChanging) {
       if ((_pageController.page! - _controller!.index).abs() > 1.0) {
@@ -267,19 +281,20 @@ class _UnionOuterTabBarViewState extends State<UnionOuterTabBarView> {
               viewModelBuilder: () => widget.tabBarViewModel,
               // onViewModelReady: (model) => model.init(),
               builder: (context, viewModel, child) => UnionOuterPageView(
-                scrollDirection: viewModel.scrollDirection,
-                dragStartBehavior: widget.dragStartBehavior,
-                scrollBehavior: PageBehavior(),
-                controller: _pageController,
-                physics: 
-                //viewModel.onlyOne ? null :NeverScrollableScrollPhysics(),
-                viewModel.onlyOne
-                    ? const PageScrollPhysics().applyTo(widget.physics ??
-                        PageScrollPhysics()
-                            .applyTo(const ClampingScrollPhysics()))
-                    : NeverScrollableScrollPhysics(),
-                children: _childrenWithKey,
-              )),
+                    scrollDirection: viewModel.scrollDirection,
+                    dragStartBehavior: widget.dragStartBehavior,
+                    scrollBehavior: PageBehavior(),
+                    controller: _pageController,
+                    physics:
+                        //viewModel.onlyOne ? null :NeverScrollableScrollPhysics(),
+                        viewModel.onlyOne
+                            ? const PageScrollPhysics().applyTo(
+                                widget.physics ??
+                                    PageScrollPhysics()
+                                        .applyTo(const ClampingScrollPhysics()))
+                            : NeverScrollableScrollPhysics(),
+                    children: _childrenWithKey,
+                  )),
         ));
   }
 }

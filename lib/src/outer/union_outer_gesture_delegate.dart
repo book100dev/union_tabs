@@ -10,15 +10,21 @@ class UnionOuterGestureDelegate {
   /// 用于手势下发。
   /// record the gesture.
   Drag? _drag;
+  TabBarViewModel? viewModel;
 
   /// 将处理UnionScrollNotification.
   bool handleUnionScrollNotification(
-      BuildContext context, UnionScrollNotification notification) {
+      BuildContext context, UnionScrollNotification notification,
+      {TabBarViewModel? tabBarViewModel}) {
+    viewModel = tabBarViewModel;
+    //判断外联tab是否可以滑动
+    // return false;
     if (tabController!.index != notification.index) {
       return false;
     }
 
     if (notification is UnionScrollStartNotification) {
+      ScrollSingleton().scrolling = false;
       _drag = pageController!.position.drag(notification.dragDetails!, () {
         _drag = null;
       });
@@ -68,30 +74,25 @@ class UnionOuterGestureDelegate {
         if (index >= tabController!.length) index = tabController!.length - 1;
 
         tabController?.animateTo(index, duration: Duration(milliseconds: 500));
+        tabController?.animation?.removeListener(modelHandel);
+        tabController?.animation?.addListener(modelHandel);
       }
     } else if (notification is UnionScrollUpdateNotification) {
-      // if (_drag != null && notification.dragDetails != null) {
-      //   /// update the viewpager's position
-      //   _drag?.update(notification.dragDetails!);
-
-      //   /// 计算用户滑动
-      //   /// update the offset, to update the indicator's position
-      //   MediaQueryData data = MediaQuery.of(context);
-      //   if (!tabController!.indexIsChanging) {
-      //     Axis? axis = pageController?.position.axis;
-      //     if (axis == Axis.horizontal) {
-      //       tabController?.offset = (tabController!.offset +
-      //               notification.dragDetails!.delta.dx / data.size.width)
-      //           .clamp(-1.0, 1.0);
-      //     } else {
-      //       tabController?.offset = (tabController!.offset +
-      //               notification.dragDetails!.delta.dy / data.size.height)
-      //           .clamp(-1.0, 1.0);
-      //     }
-      //   }
-      // }
+      //tabBarViewModel.scrolling.value = true;
+      print('外部正在滑动');
+      ScrollSingleton().scrolling = true;
     }
     return true;
+  }
+
+  void modelHandel() {
+    if (tabController?.animation?.value is int ||
+        tabController?.animation?.value ==
+            tabController?.animation?.value.roundToDouble()) {
+      print('滑动结束了啊啊--- - ${tabController!.animation!.value}');
+      //viewModel?.scrolling.value = false;
+      ScrollSingleton().scrolling = false;
+    }
   }
 
   void dispose() {

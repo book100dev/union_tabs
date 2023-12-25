@@ -9,13 +9,19 @@ class UnionPageController extends ScrollController {
     this.initialPage = 0,
     this.keepPage = true,
     this.viewportFraction = 1.0,
+    this.title,
+    this.condition = true,
+    this.pageCount = 0,
+
   }) : assert(initialPage != null),
         assert(keepPage != null),
         assert(viewportFraction != null),
         assert(viewportFraction > 0.0);
-
+  final bool condition;
+  final int pageCount;
   /// The page to show when first creating the [PageView].
   final int initialPage;
+  final String? title;
 
   /// Save the current [page] with [PageStorage] and restore it if
   /// this controller's scrollable is recreated.

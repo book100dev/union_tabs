@@ -813,6 +813,9 @@ class UnionInnerScrollableState extends State<UnionInnerScrollable>
 
   @override
   String? get restorationId => widget.restorationId;
+  
+  @override
+  double get devicePixelRatio => 0.0;
 }
 
 class _ScrollSemantics extends SingleChildRenderObjectWidget {

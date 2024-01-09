@@ -107,7 +107,7 @@ class PagePosition extends ScrollPositionWithSingleContext implements PageMetric
 
   @override
   void saveScrollOffset() {
-    PageStorage.of(context.storageContext)?.writeState(context.storageContext, _cachedPage ?? getPageFromPixels(pixels, viewportDimension));
+    PageStorage.of(context.storageContext).writeState(context.storageContext, _cachedPage ?? getPageFromPixels(pixels, viewportDimension));
   }
 
   @override
@@ -182,6 +182,7 @@ class PagePosition extends ScrollPositionWithSingleContext implements PageMetric
     double? viewportDimension,
     AxisDirection? axisDirection,
     double? viewportFraction,
+    double? devicePixelRatio,
   }) {
     return PageMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -190,8 +191,27 @@ class PagePosition extends ScrollPositionWithSingleContext implements PageMetric
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       viewportFraction: viewportFraction ?? this.viewportFraction,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
+  // @override
+  // PageMetrics copyWith({
+  //   double? minScrollExtent,
+  //   double? maxScrollExtent,
+  //   double? pixels,
+  //   double? viewportDimension,
+  //   AxisDirection? axisDirection,
+  //   double? viewportFraction,
+  // }) {
+  //   return PageMetrics(
+  //     minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
+  //     maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
+  //     pixels: pixels ?? (hasPixels ? this.pixels : null),
+  //     viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
+  //     axisDirection: axisDirection ?? this.axisDirection,
+  //     viewportFraction: viewportFraction ?? this.viewportFraction, devicePixelRatio: 0,
+  //   );
+  // }
 }
 
 //

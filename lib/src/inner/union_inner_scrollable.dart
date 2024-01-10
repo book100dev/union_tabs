@@ -377,6 +377,7 @@ class UnionInnerScrollableState extends State<UnionInnerScrollable>
   AxisDirection get axisDirection => widget.axisDirection;
 
   late ScrollBehavior _configuration;
+  late double _devicePixelRatio;
   ScrollPhysics? _physics;
   ScrollController? _fallbackScrollController;
   MediaQueryData? _mediaQueryData;
@@ -407,6 +408,8 @@ class UnionInnerScrollableState extends State<UnionInnerScrollable>
         _physics!, this, oldPosition);
     assert(_position != null);
     _effectiveScrollController.attach(position);
+
+     _devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? View.of(context).devicePixelRatio;
   }
 
   @override
@@ -815,7 +818,7 @@ class UnionInnerScrollableState extends State<UnionInnerScrollable>
   String? get restorationId => widget.restorationId;
   
   @override
-  double get devicePixelRatio => 0.0;
+  double get devicePixelRatio => _devicePixelRatio;
 }
 
 class _ScrollSemantics extends SingleChildRenderObjectWidget {

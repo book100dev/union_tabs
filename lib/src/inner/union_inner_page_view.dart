@@ -22,7 +22,7 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
 final UnionPageController _defaultPageController = UnionPageController(pageCount: 0);
 const UnionPageScrollPhysics _kPagePhysics = UnionPageScrollPhysics();
 
-class UnionInnerPageView extends StatefulWidget {
+class UnionInnerPageView extends StatefulWidget{
   UnionInnerPageView({
     Key? key,
     this.scrollDirection = Axis.horizontal,
@@ -198,7 +198,9 @@ class UnionInnerPageView extends StatefulWidget {
   State<UnionInnerPageView> createState() => _UnionInnerPageViewState();
 }
 
-class _UnionInnerPageViewState extends State<UnionInnerPageView> {
+class _UnionInnerPageViewState extends State<UnionInnerPageView> 
+// with AutomaticKeepAliveClientMixin
+{
   int _lastReportedPage = 0;
 
   @override
@@ -222,8 +224,12 @@ class _UnionInnerPageViewState extends State<UnionInnerPageView> {
     }
   }
 
+  // @override
+  // bool get wantKeepAlive => true; // 是否需要缓存
+  
   @override
   Widget build(BuildContext context) {
+    // super.build(context); 
     final AxisDirection axisDirection = _getDirection(context);
     final ScrollPhysics physics = _ForceImplicitScrollPhysics(
       allowImplicitScrolling: widget.allowImplicitScrolling,

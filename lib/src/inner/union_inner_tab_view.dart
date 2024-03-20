@@ -242,6 +242,7 @@ class _UnionInnerTabBarViewState extends State<UnionInnerTabBarView> {
                   scrollDirection: widget.scrollDirection,
                   dragStartBehavior: widget.dragStartBehavior,
                   controller: _pageController,
+                  allowImplicitScrolling: true,
                   physics: widget.physics == null
                       ? const PageScrollPhysics()
                           .applyTo(const ClampingScrollPhysics())
@@ -256,6 +257,7 @@ class _UnionInnerTabBarViewState extends State<UnionInnerTabBarView> {
           scrollDirection: widget.scrollDirection,
           dragStartBehavior: widget.dragStartBehavior,
           controller: _pageController,
+          allowImplicitScrolling: true,
           physics: widget.physics == null
               ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())
               : const PageScrollPhysics().applyTo(widget.physics),

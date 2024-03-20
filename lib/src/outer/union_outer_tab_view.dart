@@ -285,6 +285,7 @@ class _UnionOuterTabBarViewState extends State<UnionOuterTabBarView> {
                     dragStartBehavior: widget.dragStartBehavior,
                     scrollBehavior: PageBehavior(),
                     controller: _pageController,
+                    allowImplicitScrolling: true,
                     physics:
                         //viewModel.onlyOne ? null :NeverScrollableScrollPhysics(),
                         viewModel.onlyOne
